@@ -2,11 +2,22 @@
 #include <common/Logger.h>
 #include <common/Utils.h>
 
+#include <unistd.h>
+
 #define MAX_TCP_CLIENTS_QUEUE 10
 
 TCPServer::TCPServer(const Peer& server_data, Selector& selector) : _serverData(server_data), _selector(selector)
 {
 
+}
+
+TCPServer::~TCPServer()
+{
+    for (auto client : _clients) {
+        delete client;
+    }
+
+    CloseSocket();
 }
 
 ECode TCPServer::Init()
@@ -111,4 +122,12 @@ ECode TCPServer::Process()
     }
 
     return ECode::OK;
+}
+
+void TCPServer::CloseSocket()
+{
+    if (_serverData.fd != -1) {
+        close(_serverData.fd);
+        _serverData.fd = -1;
+    }
 }

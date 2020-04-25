@@ -12,6 +12,8 @@ class TCPServer : public ISelectable
 {
 public:
     TCPServer(const Peer& server_data, Selector& selector);
+    ~TCPServer();
+
     TCPServer(const TCPServer&) = delete;
     TCPServer(const TCPServer&&) = delete;
     TCPServer& operator= (const TCPServer&) = delete;
@@ -23,6 +25,7 @@ public:
     ECode GetPacket(Packet& packet);
 
     ECode Process();
+    void CloseSocket();
 
 private:
     Peer _serverData;

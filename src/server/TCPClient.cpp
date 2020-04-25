@@ -2,11 +2,18 @@
 #include <common/Logger.h>
 #include <common/Utils.h>
 
+#include <unistd.h>
+
 #define BUFFER_SIZE 2048
 
 TCPClient::TCPClient(const Peer& server_data) : _serverData(server_data)
 {
 
+}
+
+TCPClient::~TCPClient()
+{
+    CloseSocket();
 }
 
 ECode TCPClient::Init()
@@ -92,4 +99,12 @@ ECode TCPClient::GetPacket(Packet& packet)
     _packets.pop();
     
     return ECode::OK;
+}
+
+void TCPClient::CloseSocket()
+{
+    if (_clientData.fd != -1) {
+        close(_clientData.fd);
+        _clientData.fd = -1;
+    }
 }

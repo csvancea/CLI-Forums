@@ -10,6 +10,8 @@ class TCPClient : public ISelectable
 {
 public:
     TCPClient(const Peer& server_data);
+    ~TCPClient();
+
     TCPClient(const TCPClient&) = delete;
     TCPClient(const TCPClient&&) = delete;
     TCPClient& operator= (const TCPClient&) = delete;
@@ -19,6 +21,7 @@ public:
 
     ECode Init();
     ECode GetPacket(Packet& packet);
+    void CloseSocket();
 
 private:
     Peer _serverData;
