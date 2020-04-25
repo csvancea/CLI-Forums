@@ -87,7 +87,7 @@ void TCPClient::Select()
         p.source = _clientData;
         _packets.push(std::move(p));
 
-        _fragments.Remove(0, expected_bytes);
+        _fragments.Remove(0, expected_bytes + sizeof(uint16_t));
     }
 }
 
