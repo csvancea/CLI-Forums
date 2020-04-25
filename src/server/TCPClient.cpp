@@ -76,6 +76,8 @@ void TCPClient::Select()
         _fragments.ResetReadPointer();
         if (_fragments.Read(expected_bytes) != sizeof(uint16_t))
             break;
+        if (expected_bytes == 0)
+            break;
         if (_fragments.GetRemainingBytesToRead() < expected_bytes) 
             break;
 
