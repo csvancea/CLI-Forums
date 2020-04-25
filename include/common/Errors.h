@@ -3,15 +3,22 @@
 enum class ECode
 {
     OK,
+
     UDP_SOCKET,
     UDP_BIND,
     UDP_RECV,
+
     TCP_SOCKET,
-    TCP_CONNECT,
+    TCP_BIND,
     TCP_RECV,
+    TCP_CONNECT,
     TCP_LISTEN,
+    TCP_ACCEPT,
 
     FD_SELECT,
+
+    SELECTOR_ADD,
+    SELECTOR_REMOVE,
 
     DUPLICATE,
     NONEXISTENT,

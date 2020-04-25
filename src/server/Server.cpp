@@ -3,7 +3,7 @@
 #include <common/NetworkObjects.h>
 
 
-Server::Server(const Peer& server_data) :  _running(true), _serverData(server_data), _UDPServer(server_data)
+Server::Server(const Peer& server_data) :  _running(true), _serverData(server_data), _UDPServer(server_data), _TCPServer(server_data, _selector)
 {
 
 }
@@ -19,6 +19,12 @@ ECode Server::Init()
         return err;
     }
 
+    err = _TCPServer.Init();
+    if (err != ECode::OK) {
+        LOG_ERROR("Can't init TCPServer: {}", err);
+        return err;
+    }
+
 
     LOG_MESSAGE("Initializing keyboard");
     err = _keyboard.Init();
@@ -29,6 +35,7 @@ ECode Server::Init()
 
     LOG_MESSAGE("Initializing input selector");
     _selector.Add(&_UDPServer);
+    _selector.Add(&_TCPServer);
     _selector.Add(&_keyboard);
 
     return ECode::OK;
@@ -38,6 +45,7 @@ ECode Server::Run()
 {
     while (_running) {
         _selector.Process();
+        _TCPServer.Process();
         ProcessUDPPackets();
     }
 

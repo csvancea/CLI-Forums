@@ -1,6 +1,7 @@
 #pragma once
 
 #include <server/UDPServer.h>
+#include <server/TCPServer.h>
 
 #include <common/Errors.h>
 #include <common/Keyboard.h>
@@ -37,6 +38,7 @@ private:
     bool _running;
     Peer _serverData;
     UDPServer _UDPServer;
+    TCPServer _TCPServer;
     Keyboard _keyboard;
 
     Selector _selector;

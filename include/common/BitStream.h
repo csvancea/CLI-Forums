@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <type_traits>
+#include <cstdint>
 
 class BitStream
 {
@@ -10,11 +11,19 @@ public:
     BitStream();
     BitStream(const void *data, size_t size);
 
+    size_t Write(BitStream& bs, size_t size = SIZE_MAX);
     size_t Write(const void *data, size_t size);
     size_t Read(void *data, size_t size);
 
+    bool SetReadPointer(size_t idx);
+    size_t GetReadPointer() const;
     void ResetReadPointer();
+
     const std::vector<char> GetUnderlyingBuffer() const;
+    size_t GetBytes() const;
+    size_t GetRemainingBytesToRead() const;
+
+    size_t Remove(size_t start, size_t size);
 
 
     template <class T>

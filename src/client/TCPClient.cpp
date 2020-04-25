@@ -1,5 +1,6 @@
 #include <client/TCPClient.h>
 #include <common/Logger.h>
+#include <common/Utils.h>
 
 #define BUFFER_SIZE 2048
 
@@ -22,6 +23,8 @@ ECode TCPClient::Init()
         LOG_ERROR("Can't create TCP socket.");
         return ECode::TCP_SOCKET;
     }
+
+    Utils::DisableNeagle(_serverData.fd);
 
     ret = connect(_serverData.fd, (struct sockaddr *) &address, sizeof(struct sockaddr));
     if (ret < 0) {

@@ -65,6 +65,8 @@ struct Peer
 
 struct Packet
 {
+    Packet() : size(0) { }
+
     Peer source;
     BitStream bs;
     size_t size;
