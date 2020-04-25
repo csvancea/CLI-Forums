@@ -23,6 +23,9 @@ public:
     ECode GetPacket(Packet& packet);
     void CloseSocket();
 
+    const Peer& GetPeer() const;
+    void SetClientID(const std::string& client_id);
+
 private:
     Peer _serverData;
     Peer _clientData;

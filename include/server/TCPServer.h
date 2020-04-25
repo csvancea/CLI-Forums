@@ -27,6 +27,11 @@ public:
     ECode Process();
     void CloseSocket();
 
+    TCPClient *GetClient(const std::string& client_id);
+    TCPClient *GetClient(int sockfd);
+
+    ECode Kick(TCPClient *client);
+
 private:
     Peer _serverData;
     Selector& _selector;

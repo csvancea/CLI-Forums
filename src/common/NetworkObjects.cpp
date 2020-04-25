@@ -3,6 +3,11 @@
 
 namespace NetObj
 {
+	bool IsValidRPC(uint8_t rpc)
+	{
+		return rpc > RPC_START && rpc < RPC_END;
+	}
+
 	const std::string& TypeToString(uint8_t type)
 	{
         static std::string INT{"INT"};
@@ -173,4 +178,37 @@ size_t BitStream::Write(const NetObj::Float& data)
 	bytes_written += Write(data.exponent);
 
 	return bytes_written;
+}
+
+template <>
+size_t BitStream::Write(const std::string& in)
+{
+    size_t written_bytes = 0;
+
+    written_bytes += Write<uint16_t>(in.length());
+    written_bytes += Write(in.c_str(), in.length());
+    return written_bytes;
+}
+
+template <>
+size_t BitStream::Read(std::string& out)
+{
+    size_t read_bytes = 0;
+	size_t ret;
+    uint16_t size;
+
+    ret = Read(size);
+    read_bytes += ret;
+    
+    if (ret != sizeof (uint16_t)) {
+        return read_bytes;
+    }
+
+    out.resize(size); // size poate fi exploatat
+
+    ret = Read(&out[0], size);
+    read_bytes += ret;
+
+    out.resize(ret); // poate am citit mai putin din stream decat era anuntat initial
+    return read_bytes;
 }

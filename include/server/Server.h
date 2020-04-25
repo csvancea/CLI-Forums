@@ -34,6 +34,7 @@ private:
 
     ECode ReadUDPPacket(Packet& packet, UDPData& data);
     ECode ProcessUDPPackets();
+    ECode ProcessTCPPackets();
     ECode ProcessKeyboard();
 
     bool _running;

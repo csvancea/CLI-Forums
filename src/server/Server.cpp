@@ -47,6 +47,7 @@ ECode Server::Run()
         _selector.Process();
         _TCPServer.Process();
         ProcessUDPPackets();
+        ProcessTCPPackets();
         ProcessKeyboard();
     }
 
@@ -129,6 +130,61 @@ ECode Server::ProcessUDPPackets()
         if (ret != ECode::OK) {
             LOG_ERROR("Invalid UDP packet received. Can't be parsed");
             continue;
+        }
+    }
+    return ECode::OK;
+}
+
+ECode Server::ProcessTCPPackets()
+{
+    ECode ret;
+    Packet packet;
+    
+    while (_TCPServer.GetPacket(packet) == ECode::OK) {
+        uint8_t rpc;
+
+
+        TCPClient *client = _TCPServer.GetClient(packet.source.fd);
+        if (client == nullptr) {
+            LOG_ERROR("TCP packet arrived from unknown source {}:{} ({})", packet.source.ip, packet.source.port, packet.source.client_id);
+            LOG_ERROR("Packet discarded");
+            continue;
+        }
+
+        packet.bs.ResetReadPointer();
+        if (packet.bs.Read(rpc) != sizeof(uint8_t) || !NetObj::IsValidRPC(rpc)) {
+            LOG_ERROR("Invalid TCP packet received from {}:{} ({}) - unknown RPC {}", packet.source.ip, packet.source.port, packet.source.client_id, rpc);
+            LOG_ERROR("Packet discarded");
+            continue;
+        }
+        
+        switch (rpc) {
+        case NetObj::RPC_CLIENT_ANNOUNCE:
+            std::string client_id;
+
+            if (packet.bs.Read(client_id) == 0 || client_id.length() == 0) {
+                LOG_ERROR("Empty client_id received from {}:{}", packet.source.ip, packet.source.port);
+                LOG_ERROR("Client kicked");
+
+                _TCPServer.Kick(client);
+                continue;
+            }
+            if (_TCPServer.GetClient(client_id) != nullptr) {
+                LOG_ERROR("There's already a connected client with client_id={}", client_id);
+                LOG_ERROR("Client kicked");
+
+                _TCPServer.Kick(client);
+                continue;
+            }
+            if (client->GetPeer().client_id != "") {
+                LOG_ERROR("Client {}:{} ({}) already announced itself", packet.source.ip, packet.source.port, packet.source.client_id);
+                LOG_ERROR("Packet discarded");
+                continue;
+            }
+
+            client->SetClientID(client_id);
+            LOG_MESSAGE("Client {}:{} ({}) connected and announced itself", packet.source.ip, packet.source.port, client_id);
+            break;
         }
     }
     return ECode::OK;

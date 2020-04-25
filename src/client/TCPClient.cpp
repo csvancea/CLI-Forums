@@ -1,6 +1,7 @@
 #include <client/TCPClient.h>
 #include <common/Logger.h>
 #include <common/Utils.h>
+#include <common/NetworkObjects.h>
 
 #include <unistd.h>
 
@@ -41,6 +42,15 @@ ECode TCPClient::Init()
     
     LOG_MESSAGE("Connected TCP client to: {}:{}", _serverData.ip, _serverData.port);
     return ECode::OK;
+}
+
+ECode TCPClient::Announce()
+{
+    BitStream bs;
+    bs.Write<uint8_t>(NetObj::RPC_CLIENT_ANNOUNCE);
+    bs.Write(_serverData.client_id); // nu are ce cauta in _serverData
+
+    return Send(bs);
 }
 
 int TCPClient::GetFileDescriptor() const

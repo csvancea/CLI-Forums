@@ -23,6 +23,7 @@ public:
     ECode GetPacket(Packet& packet);
     void CloseSocket();
     ECode Send(const BitStream& bs);
+    ECode Announce();
 
 private:
     Peer _serverData;

@@ -131,3 +131,34 @@ void TCPServer::CloseSocket()
         _serverData.fd = -1;
     }
 }
+
+TCPClient *TCPServer::GetClient(const std::string& client_id)
+{
+    auto it = std::find_if(_clients.begin(), _clients.end(), 
+            [&client_id](const TCPClient *client) { return client->GetPeer().client_id == client_id; });
+    
+    if (it != _clients.end()) {
+        return *it;
+    }
+    return nullptr;
+}
+
+TCPClient *TCPServer::GetClient(int sockfd)
+{
+    auto it = std::find_if(_clients.begin(), _clients.end(), 
+            [&sockfd](const TCPClient *client) { return client->GetFileDescriptor() == sockfd; });
+    
+    if (it != _clients.end()) {
+        return *it;
+    }
+    return nullptr;
+}
+
+ECode TCPServer::Kick(TCPClient *client)
+{
+    _selector.Remove(client);
+    _clients.erase(std::remove(_clients.begin(), _clients.end(), client), _clients.end());
+    delete client;
+
+    return ECode::OK;
+}

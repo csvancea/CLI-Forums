@@ -110,3 +110,13 @@ void TCPClient::CloseSocket()
         _clientData.fd = -1;
     }
 }
+
+const Peer& TCPClient::GetPeer() const
+{
+    return _clientData;
+}
+
+void TCPClient::SetClientID(const std::string& client_id)
+{
+    _clientData.client_id = client_id;
+}

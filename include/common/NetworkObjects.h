@@ -15,6 +15,16 @@
 namespace NetObj
 {
     enum {
+        RPC_INVALID,
+        RPC_START = RPC_INVALID,
+        
+        RPC_CLIENT_ANNOUNCE,
+
+        RPC_END
+    };
+    bool IsValidRPC(uint8_t rpc);
+
+    enum {
         TYPE_INT,
         TYPE_SHORTREAL,
         TYPE_FLOAT,
@@ -123,3 +133,9 @@ size_t BitStream::Read(NetObj::Float& data);
 
 template <>
 size_t BitStream::Write(const NetObj::Float& data);
+
+template <>
+size_t BitStream::Write(const std::string& in);
+
+template <>
+size_t BitStream::Read(std::string& out);

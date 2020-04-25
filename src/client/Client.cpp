@@ -1,5 +1,8 @@
 #include <client/Client.h>
 #include <common/Logger.h>
+#include <common/NetworkObjects.h>
+
+#include <sstream>
 
 
 Client::Client(const Peer& server) :  _running(true), _serverData(server), _TCPClient(server)
@@ -15,6 +18,12 @@ ECode Client::Init()
     err = _TCPClient.Init();
     if (err != ECode::OK) {
         LOG_ERROR("Can't init TCPClient: {}", err);
+        return err;
+    }
+
+    err = _TCPClient.Announce();
+    if (err != ECode::OK) {
+        LOG_ERROR("Can't send initial data to server: {}", err);
         return err;
     }
 
@@ -44,11 +53,46 @@ ECode Client::Run()
 
 ECode Client::ProcessKeyboard()
 {
-    std::string cmd;
-    
-    while (_keyboard.GetCommand(cmd) == ECode::OK) {
-        if (cmd == "exit") {
-            _running = false;
+    std::string cmdline;
+
+    while (_keyboard.GetCommand(cmdline) == ECode::OK) {
+        std::stringstream ss(cmdline);
+        std::string cmd;
+
+        if (ss >> cmd) {
+            if (cmd == "exit") {
+                _running = false;
+            }
+            else if (cmd == "subscribe") {
+                std::string topic;
+                int sf;
+
+                if (ss >> topic >> sf) {
+                    BitStream bs;
+                    // bs.Write
+
+                    LOG_MESSAGE("Gonna subscribe to topic={} with sf={}", topic, sf);
+                } 
+                else {
+                    LOG_ERROR("subscribe <topic> <sf>");
+                }
+            }
+            else if (cmd == "unsubscribe") {
+                std::string topic;
+
+                if (ss >> topic) {
+                    LOG_MESSAGE("Gonna unsubscribe from topic={}", topic);
+                }
+                else {
+                    LOG_ERROR("subscribe <topic> <sf>");
+                }          
+            }
+            else {
+                LOG_ERROR("Unknown command: {}", cmdline);
+            }
+        }
+        else {
+            LOG_ERROR("Can't parse command name from input: {}", cmdline);
         }
     }
     return ECode::OK;

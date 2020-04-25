@@ -42,7 +42,7 @@ private:
 
 struct Peer
 {
-    Peer() : client_id("unknown"), ip(INADDR_NONE), port(0), fd(-1) { }
+    Peer() : client_id(""), ip(INADDR_NONE), port(0), fd(-1) { }
 
     std::string client_id;
     IP ip;
@@ -50,7 +50,7 @@ struct Peer
     int fd;
 
     bool IsValid() const {
-        if (client_id.length() == 0 || client_id.length() > 10)
+        if (client_id.length() > 10)
             return false;
         
         if (ip == INADDR_NONE)
