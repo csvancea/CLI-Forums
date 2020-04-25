@@ -47,6 +47,7 @@ ECode Server::Run()
         _selector.Process();
         _TCPServer.Process();
         ProcessUDPPackets();
+        ProcessKeyboard();
     }
 
     return ECode::OK;
@@ -128,6 +129,18 @@ ECode Server::ProcessUDPPackets()
         if (ret != ECode::OK) {
             LOG_ERROR("Invalid UDP packet received. Can't be parsed");
             continue;
+        }
+    }
+    return ECode::OK;
+}
+
+ECode Server::ProcessKeyboard()
+{
+    std::string cmd;
+    
+    while (_keyboard.GetCommand(cmd) == ECode::OK) {
+        if (cmd == "exit") {
+            _running = false;
         }
     }
     return ECode::OK;

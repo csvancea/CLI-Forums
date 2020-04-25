@@ -11,6 +11,7 @@ enum class ECode
     TCP_SOCKET,
     TCP_BIND,
     TCP_RECV,
+    TCP_SEND,
     TCP_CONNECT,
     TCP_LISTEN,
     TCP_ACCEPT,

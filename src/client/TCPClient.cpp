@@ -72,3 +72,21 @@ void TCPClient::CloseSocket()
         _serverData.fd = -1;
     }
 }
+
+ECode TCPClient::Send(const BitStream& bs)
+{
+    BitStream netbs;
+    ssize_t ret;
+
+    netbs.Write((uint16_t)bs.GetBytes());
+    netbs.Write(bs.GetUnderlyingBuffer().data(), bs.GetBytes());
+
+    ret = send(_serverData.fd, netbs.GetUnderlyingBuffer().data(), netbs.GetBytes(), 0);
+    if ((size_t)ret != netbs.GetBytes()) {
+        return ECode::TCP_SEND;
+    }
+
+    LOG_MESSAGE("Sent {} bytes", ret);
+
+    return ECode::OK;
+}

@@ -36,7 +36,20 @@ ECode Client::Run()
 {
     while (_running) {
         _selector.Process();
+        ProcessKeyboard();
     }
 
+    return ECode::OK;
+}
+
+ECode Client::ProcessKeyboard()
+{
+    std::string cmd;
+    
+    while (_keyboard.GetCommand(cmd) == ECode::OK) {
+        if (cmd == "exit") {
+            _running = false;
+        }
+    }
     return ECode::OK;
 }

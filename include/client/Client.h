@@ -19,6 +19,8 @@ public:
     ECode Run();
 
 private:
+    ECode ProcessKeyboard();
+
     bool _running;
     Peer _serverData;
     TCPClient _TCPClient;
