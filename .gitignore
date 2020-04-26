@@ -2,5 +2,5 @@
 build/
 pcom_hw2_udp_client/
 
-clientdbg
-serverdbg
+clientdbg_*
+serverdbg_*

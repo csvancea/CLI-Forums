@@ -29,7 +29,7 @@ ECode UDPServer::Init()
         return ECode::UDP_BIND;
     }
     
-    LOG_MESSAGE("Inited UDP server on: {}:{}", _serverData.ip, _serverData.port);
+    LOG_DEBUG("Inited UDP server on: {}:{}", _serverData.ip, _serverData.port);
     return ECode::OK;
 }
 

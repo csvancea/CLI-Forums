@@ -15,8 +15,8 @@
 
 #ifdef ENABLE_LOGGING
 
-#define LOG_MESSAGE(format, ...) \
-            do { Logger::GetInstance().Log(Logger::RULE_MESSAGE, format, ## __VA_ARGS__); } while (0)
+#define LOG_DEBUG(format, ...) \
+            do { Logger::GetInstance().Log(Logger::RULE_DEBUG, format, ## __VA_ARGS__); } while (0)
 
 #define LOG_WARNING(format, ...) \
             do { Logger::GetInstance().Log(Logger::RULE_WARNING, format, ## __VA_ARGS__); } while (0)
@@ -26,11 +26,14 @@
 
 #else
 
-#define LOG_MESSAGE(format, ...)
+#define LOG_DEBUG(format, ...)
 #define LOG_WARNING(format, ...)
 #define LOG_ERROR(format, ...)
 
 #endif
+
+#define LOG_MESSAGE(format, ...) \
+            do { Logger::GetInstance().Log(Logger::RULE_MESSAGE, format, ## __VA_ARGS__); } while (0)
 
 class Logger
 {
@@ -43,13 +46,14 @@ private:
 public:
 	enum {
 		RULE_NONE    = 0x00,
-		RULE_MESSAGE = 0x01,
+		RULE_DEBUG   = 0x01,
 		RULE_WARNING = 0x02,
 		RULE_ERROR   = 0x04,
+		RULE_MESSAGE = 0x08,
 		RULE_ALL     = 0xFF
 	};
 
-	static const std::string& GetRuleName(int rule);
+	const std::string& GetRulePrefix(int rule);
 
 	static Logger& GetInstance();
 
@@ -60,7 +64,7 @@ public:
 	template <typename... Args>
 	void Log(int rule, const char *format, const Args& ... args) {
 		std::string message = fmt::vformat(format, fmt::make_format_args(args...));
-		std::string final = fmt::format("[{}] {}\n", GetRuleName(rule), message);
+		std::string final = fmt::format("{}{}\n", GetRulePrefix(rule), message);
 
 		if (_outputToFile && (_outputToFileRules & rule)) {
 			_outputFile << final;

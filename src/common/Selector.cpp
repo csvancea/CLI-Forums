@@ -18,7 +18,7 @@ ECode Selector::Add(ISelectable *selectable)
     _fdmax = std::max(fd, _fdmax);
     FD_SET(fd, &_fdset);
 
-    LOG_MESSAGE("Inserted fd={} into _fdset, _fdmax={}", fd, _fdmax);
+    LOG_DEBUG("Inserted fd={} into _fdset, _fdmax={}", fd, _fdmax);
     return ECode::OK;
 }
 
@@ -30,7 +30,7 @@ ECode Selector::Remove(ISelectable *selectable)
     }
 
     FD_CLR(fd, &_fdset);
-    LOG_MESSAGE("Removed fd={} from _fdset, _fdmax={}", fd, _fdmax);
+    LOG_DEBUG("Removed fd={} from _fdset, _fdmax={}", fd, _fdmax);
     return ECode::OK;
 }
 
@@ -47,7 +47,7 @@ ECode Selector::Process()
 
     for (int i = 0; i <= _fdmax; ++i) {
         if (FD_ISSET(i, &fd_tmp)) {
-            LOG_MESSAGE("Selected fd={}", i);
+            LOG_DEBUG("Selected fd={}", i);
             _selectables[i]->Select();
         }
     }

@@ -16,15 +16,15 @@ Logger& Logger::GetInstance()
 	return instance;
 }
 
-const std::string& Logger::GetRuleName(int rule)
+const std::string& Logger::GetRulePrefix(int rule)
 {
-	static std::string STRING_MESSAGE{ "MESSAGE" };
-	static std::string STRING_WARNING{ "WARNING" };
-	static std::string STRING_ERROR{ "ERROR" };
-	static std::string STRING_UNKNOWN{ "UNKNOWN" };
+	static std::string STRING_DEBUG{ "[DEBUG] " };
+	static std::string STRING_WARNING{ "[WARNING] " };
+	static std::string STRING_ERROR{ "[ERROR] " };
+	static std::string STRING_UNKNOWN{ "" };
 
 	switch (rule) {
-	case Logger::RULE_MESSAGE: return STRING_MESSAGE;
+	case Logger::RULE_DEBUG: return STRING_DEBUG;
 	case Logger::RULE_WARNING: return STRING_WARNING;
 	case Logger::RULE_ERROR: return STRING_ERROR;
 	}

@@ -34,7 +34,7 @@ void Keyboard::Select()
         buffer.pop_back();
     }
 
-    LOG_MESSAGE("Read {} bytes from keyboard: {}", bytes_read, buffer);
+    LOG_DEBUG("Read {} bytes from keyboard: {}", bytes_read, buffer);
 
     /**
      * In cazul in care se citesc mai multe comenzi, le separ dupa newline

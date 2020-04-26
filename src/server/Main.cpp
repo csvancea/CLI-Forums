@@ -1,12 +1,16 @@
 #include <server/Server.h>
 #include <common/Logger.h>
 
+#include <unistd.h>
+
 
 int main(int argc, char *argv[])
 {
 #ifdef ENABLE_LOGGING
-    Logger::GetInstance().SetOutputToFile(true, Logger::RULE_ALL, "serverdbg");
+    Logger::GetInstance().SetOutputToFile(true, Logger::RULE_ALL, fmt::format("serverdbg_{}", getpid()));
     Logger::GetInstance().SetOutputToStdout(true, Logger::RULE_ALL);
+#else
+    Logger::GetInstance().SetOutputToStdout(true, Logger::RULE_MESSAGE | Logger::RULE_ERROR);
 #endif
 
     ECode ret;

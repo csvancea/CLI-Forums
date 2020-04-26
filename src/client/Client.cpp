@@ -14,7 +14,7 @@ ECode Client::Init()
 {
     ECode err;
 
-    LOG_MESSAGE("Initializing client");
+    LOG_DEBUG("Initializing client");
     err = _TCPClient.Init();
     if (err != ECode::OK) {
         LOG_ERROR("Can't init TCPClient: {}", err);
@@ -27,14 +27,14 @@ ECode Client::Init()
         return err;
     }
 
-    LOG_MESSAGE("Initializing keyboard");
+    LOG_DEBUG("Initializing keyboard");
     err = _keyboard.Init();
     if (err != ECode::OK) {
         LOG_ERROR("Can't init Keyboard: {}", err);
         return err;
     }
 
-    LOG_MESSAGE("Initializing input selector");
+    LOG_DEBUG("Initializing input selector");
     _selector.Add(&_TCPClient);
     _selector.Add(&_keyboard);
 
@@ -91,7 +91,7 @@ ECode Client::ProcessTCPPackets()
                     continue;
                 }
 
-                LOG_MESSAGE("{}:{} - {} - {} - {}", ip, port, topic, NetObj::TypeToString(type), msg);
+                LOG_DEBUG("{}:{} - {} - {} - {}", ip, port, topic, NetObj::TypeToString(type), msg);
                 break;
             }
         }
@@ -119,7 +119,7 @@ ECode Client::ProcessKeyboard()
                 if (ss >> topic >> sf) {
                     err = _TCPClient.Subscribe(topic, sf);
                     if (err == ECode::OK) {
-                        LOG_MESSAGE("Gonna subscribe to topic={} with sf={}", topic, sf);
+                        LOG_DEBUG("Gonna subscribe to topic={} with sf={}", topic, sf);
                     }
                     else {
                         LOG_ERROR("Couldn't subscribe: {}", err);
@@ -135,7 +135,7 @@ ECode Client::ProcessKeyboard()
                 if (ss >> topic) {
                     err = _TCPClient.Unsubscribe(topic);
                     if (err == ECode::OK) {
-                        LOG_MESSAGE("Gonna unsubscribe from topic={}", topic);
+                        LOG_DEBUG("Gonna unsubscribe from topic={}", topic);
                     }
                     else {
                         LOG_ERROR("Couldn't unsubscribe: {}", err);

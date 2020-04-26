@@ -50,7 +50,7 @@ ECode TCPServer::Init()
         return ECode::TCP_LISTEN;
     }
     
-    LOG_MESSAGE("Inited TCP server on: {}:{}", _serverData.ip, _serverData.port);
+    LOG_DEBUG("Inited TCP server on: {}:{}", _serverData.ip, _serverData.port);
     return ECode::OK;
 }
 
@@ -66,14 +66,14 @@ void TCPServer::Select()
 
     ret = client->Init();
     if (ret != ECode::OK) {
-        LOG_MESSAGE("Can't accept TCP connection: {}", ret);
+        LOG_DEBUG("Can't accept TCP connection: {}", ret);
         delete client;
         return;
     }
 
     ret = AddClient(client);
     if (ret != ECode::OK) {
-        LOG_MESSAGE("Can't add new client to pool");
+        LOG_DEBUG("Can't add new client to pool");
         delete client;
         return;
     }
@@ -163,7 +163,7 @@ ECode TCPServer::AddClient(TCPClient *client)
     }
 
     _clients.push_back(client);
-    LOG_MESSAGE("TCP client added!");
+    LOG_DEBUG("TCP client added!");
     return ECode::OK;
 }
 
@@ -195,7 +195,7 @@ std::pair<std::vector<TCPClient *>::iterator, ECode> TCPServer::RemoveClientImpl
 
     delete *client_it;
     client_it = _clients.erase(client_it);
-    LOG_MESSAGE("TCP client deleted!");
+    LOG_DEBUG("TCP client deleted!");
     return std::make_pair(client_it, ECode::OK);
 }
 

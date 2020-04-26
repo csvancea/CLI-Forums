@@ -12,7 +12,7 @@ ECode Server::Init()
 {
     ECode err;
 
-    LOG_MESSAGE("Initializing servers");
+    LOG_DEBUG("Initializing servers");
     err = _UDPServer.Init();
     if (err != ECode::OK) {
         LOG_ERROR("Can't init UDPServer: {}", err);
@@ -26,14 +26,14 @@ ECode Server::Init()
     }
 
 
-    LOG_MESSAGE("Initializing keyboard");
+    LOG_DEBUG("Initializing keyboard");
     err = _keyboard.Init();
     if (err != ECode::OK) {
         LOG_ERROR("Can't init Keyboard: {}", err);
         return err;
     }
 
-    LOG_MESSAGE("Initializing input selector");
+    LOG_DEBUG("Initializing input selector");
     _selector.Add(&_UDPServer);
     _selector.Add(&_TCPServer);
     _selector.Add(&_keyboard);
@@ -150,7 +150,7 @@ ECode Server::ProcessUDPPackets()
             LOG_ERROR("Couldn't save the message: {}", ret);
             continue;
         }    
-        LOG_MESSAGE("{}:{} - {} - {} - {}", packet.source.ip, packet.source.port, data.topic, NetObj::TypeToString(data.type), data.msg);
+        LOG_DEBUG("{}:{} - {} - {} - {}", packet.source.ip, packet.source.port, data.topic, NetObj::TypeToString(data.type), data.msg);
     }
     return ECode::OK;
 }
@@ -212,7 +212,7 @@ ECode Server::ProcessTCPPackets()
                 }
 
                 client->SetClientID(client_id);
-                LOG_MESSAGE("Client {}:{} ({}) connected and announced itself", packet.source.ip, packet.source.port, client_id);
+                LOG_DEBUG("Client {}:{} ({}) connected and announced itself", packet.source.ip, packet.source.port, client_id);
                 break;
             }
 
@@ -236,7 +236,7 @@ ECode Server::ProcessTCPPackets()
                     continue;
                 }
 
-                LOG_MESSAGE("Client {}:{} ({}) subscribed to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
+                LOG_DEBUG("Client {}:{} ({}) subscribed to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
                 break;
             }
 
@@ -257,7 +257,7 @@ ECode Server::ProcessTCPPackets()
                     continue;
                 }
 
-                LOG_MESSAGE("Client {}:{} ({}) unsubscribed from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
+                LOG_DEBUG("Client {}:{} ({}) unsubscribed from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
                 break;
             }
         }

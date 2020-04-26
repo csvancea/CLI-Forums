@@ -40,7 +40,7 @@ ECode TCPClient::Init()
         return ECode::TCP_CONNECT;
     }
     
-    LOG_MESSAGE("Connected TCP client to: {}:{}", _serverData.ip, _serverData.port);
+    LOG_DEBUG("Connected TCP client to: {}:{}", _serverData.ip, _serverData.port);
     return ECode::OK;
 }
 
@@ -89,7 +89,7 @@ void TCPClient::Select()
         return;
     }
 
-    LOG_MESSAGE("Received {} bytes from server: {}:{}", bytes_read, _serverData.ip, _serverData.port);
+    LOG_DEBUG("Received {} bytes from server: {}:{}", bytes_read, _serverData.ip, _serverData.port);
 
     if (bytes_read == 0) {
         // 0 bytes = gracefully closed
@@ -151,7 +151,7 @@ ECode TCPClient::Send(const BitStream& bs)
         return ECode::TCP_SEND;
     }
 
-    LOG_MESSAGE("Sent {} bytes", ret);
+    LOG_DEBUG("Sent {} bytes", ret);
 
     return ECode::OK;
 }

@@ -32,7 +32,7 @@ ECode TCPClient::Init()
     
     Utils::DisableNeagle(_clientData.fd);
 
-    LOG_MESSAGE("New TCP client connected from: {}:{}", _clientData.ip, _clientData.port);
+    LOG_DEBUG("New TCP client connected from: {}:{}", _clientData.ip, _clientData.port);
     return ECode::OK;
 }
 
@@ -62,7 +62,7 @@ void TCPClient::Select()
         return;
     }
 
-    LOG_MESSAGE("Received {} bytes from TCPClient: {}:{} ({})", bytes_read, _clientData.ip, _clientData.port, _clientData.client_id);
+    LOG_DEBUG("Received {} bytes from TCPClient: {}:{} ({})", bytes_read, _clientData.ip, _clientData.port, _clientData.client_id);
 
     if (bytes_read == 0) {
         // 0 bytes = gracefully closed
@@ -134,7 +134,7 @@ ECode TCPClient::Send(const BitStream& bs)
         return ECode::TCP_SEND;
     }
 
-    LOG_MESSAGE("Sent {} bytes", ret);
+    LOG_DEBUG("Sent {} bytes", ret);
 
     return ECode::OK;
 }
