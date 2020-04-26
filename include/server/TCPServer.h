@@ -36,7 +36,8 @@ public:
     ECode Kick(TCPClient *client);
 
 private:
-    std::pair<std::vector<TCPClient *>::iterator, ECode> RemoveClientImpl(TCPClient *client);
+    ECode RemoveClientImpl(TCPClient *client);
+    std::pair<std::vector<TCPClient *>::iterator, ECode> RemoveClientImpl(std::vector<TCPClient *>::iterator client_it);
 
     Peer _serverData;
     Selector& _selector;

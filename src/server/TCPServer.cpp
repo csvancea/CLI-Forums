@@ -109,7 +109,7 @@ ECode TCPServer::Process()
         }
 
         if (remove) {
-            it = RemoveClientImpl(client).first;
+            it = RemoveClientImpl(it).first;
         } else {
             it++;
         }
@@ -163,29 +163,34 @@ ECode TCPServer::AddClient(TCPClient *client)
 
 ECode TCPServer::RemoveClient(TCPClient *client)
 {
-    return RemoveClientImpl(client).second;
+    return RemoveClientImpl(client);
 }
 
-std::pair<std::vector<TCPClient *>::iterator, ECode> TCPServer::RemoveClientImpl(TCPClient *client)
+ECode TCPServer::RemoveClientImpl(TCPClient *client)
 {
     auto it = std::find(_clients.begin(), _clients.end(), client);
-    if (it == _clients.end()) {
-        LOG_WARNING("Couldn't find client in _clients vector.");
+    return RemoveClientImpl(it).second;
+}
+
+std::pair<std::vector<TCPClient *>::iterator, ECode> TCPServer::RemoveClientImpl(std::vector<TCPClient *>::iterator client_it)
+{
+    ECode err;
+    
+    if (client_it == _clients.end()) {
+        LOG_ERROR("Couldn't find client in _clients vector. Client NOT deleted");
+        return std::make_pair(client_it, ECode::NO_CLIENT);
     }
 
-    ECode err = _selector.Remove(client);
+    err = _selector.Remove(*client_it);
     if (err != ECode::OK) {
         LOG_ERROR("Can't remove client from selector. Client NOT deleted");
-        return std::make_pair(it, ECode::SELECTOR_REMOVE);
+        return std::make_pair(std::next(client_it), ECode::SELECTOR_REMOVE);
     }
 
-    if (it != _clients.end()) {
-        it = _clients.erase(it);
-    }
-
-    delete client;
+    delete *client_it;
+    client_it = _clients.erase(client_it);
     LOG_MESSAGE("TCP client deleted!");
-    return std::make_pair(it, ECode::OK);
+    return std::make_pair(client_it, ECode::OK);
 }
 
 ECode TCPServer::Kick(TCPClient *client)

@@ -20,6 +20,7 @@ enum class ECode
 
     SELECTOR_ADD,
     SELECTOR_REMOVE,
+    NO_CLIENT,
 
     DUPLICATE,
     NONEXISTENT,
