@@ -22,6 +22,8 @@ namespace NetObj
         RPC_SUBSCRIBE,
         RPC_UNSUBSCRIBE,
 
+        RPC_MESSAGE,
+
         RPC_END
     };
     bool IsValidRPC(uint8_t rpc);

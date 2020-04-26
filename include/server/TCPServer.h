@@ -27,6 +27,7 @@ public:
     ECode Process();
     void CloseSocket();
 
+    const std::vector<TCPClient *>& GetClients() const;
     TCPClient *GetClient(const std::string& client_id);
     TCPClient *GetClient(int sockfd);
 

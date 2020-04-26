@@ -46,75 +46,88 @@ ECode Server::Run()
     while (_running) {
         _selector.Process();
         _TCPServer.Process();
-        ProcessUDPPackets();
         ProcessTCPPackets();
+        ProcessUDPPackets();
         ProcessKeyboard();
+        ProcessForumsMessages();   
     }
 
     return ECode::OK;
 }
 
-ECode Server::ReadUDPPacket(Packet& packet, UDPData& data)
+ECode Server::ReadUDPPacket(Packet& packet, PostData& data)
 {
     std::string message;
     size_t bytes_read;
+
+    NetObj::Topic Topic;
+    uint8_t Type;
+
+    NetObj::Int Int;
+    NetObj::ShortReal ShortReal;
+    NetObj::Float Float;
+    NetObj::Message String;
+
     packet.bs.ResetReadPointer();
 
-    bytes_read = packet.bs.Read(data.topic);
+    bytes_read = packet.bs.Read(Topic);
     if (bytes_read != TOPIC_SIZE) {
         LOG_ERROR("Invalid packet: Can't parse topic name from UDP packet: expected_size={}, actual_size={}", TOPIC_SIZE, bytes_read);
         return ECode::INVALID_PACKET;
     }
 
-    bytes_read = packet.bs.Read(data.type);
+    bytes_read = packet.bs.Read(Type);
     if (bytes_read != sizeof(uint8_t)) {
         LOG_ERROR("Invalid packet: Can't parse message type from UDP packet: expected_size={}, actual_size={}", sizeof(uint8_t), bytes_read);
         return ECode::INVALID_PACKET;
     }
 
-    switch (data.type) {
+    switch (Type) {
     case NetObj::TYPE_INT:
-        bytes_read = packet.bs.Read(data.msg._int);
+        bytes_read = packet.bs.Read(Int);
         if (bytes_read != MESSAGE_INT_SIZE) {
             LOG_ERROR("Invalid packet: Can't parse message int from UDP packet: expected_size={}, actual_size={}", MESSAGE_INT_SIZE, bytes_read);
             return ECode::INVALID_PACKET;                
         }
 
-        message = data.msg._int.ToString();
+        message = Int.ToString();
         break;
 
     case NetObj::TYPE_SHORTREAL:
-        bytes_read = packet.bs.Read(data.msg._shortreal);
+        bytes_read = packet.bs.Read(ShortReal);
         if (bytes_read != MESSAGE_SHORTREAL_SIZE) {
             LOG_ERROR("Invalid packet: Can't parse message shortreal from UDP packet: expected_size={}, actual_size={}", MESSAGE_SHORTREAL_SIZE, bytes_read);
             return ECode::INVALID_PACKET;                
         }
 
-        message = data.msg._shortreal.ToString();
+        message = ShortReal.ToString();
         break;
 
     case NetObj::TYPE_FLOAT:
-        bytes_read = packet.bs.Read(data.msg._float);
+        bytes_read = packet.bs.Read(Float);
         if (bytes_read != MESSAGE_FLOAT_SIZE) {
             LOG_ERROR("Invalid packet: Can't parse message float from UDP packet: expected_size={}, actual_size={}", MESSAGE_FLOAT_SIZE, bytes_read);
             return ECode::INVALID_PACKET;                
         }
 
-        message = data.msg._float.ToString();
+        message = Float.ToString();
         break;
 
     case NetObj::TYPE_STRING:
-        bytes_read = packet.bs.Read(data.msg._str);
+        bytes_read = packet.bs.Read(String);
         if (bytes_read == 0) {
             LOG_ERROR("Invalid packet: Can't parse message string from UDP packet: expected_size>0, actual_size={}", bytes_read);
             return ECode::INVALID_PACKET;                
         }
 
-        message = data.msg._str.ToString();
+        message = String.ToString();
         break;              
     }
 
-    LOG_MESSAGE("{}:{} - {} - {} - {}", packet.source.ip, packet.source.port, data.topic, NetObj::TypeToString(data.type), message);
+    data.topic = Topic.ToString();
+    data.type = Type;
+    data.msg = message;
+
     return ECode::OK;
 }
 
@@ -124,13 +137,20 @@ ECode Server::ProcessUDPPackets()
     Packet packet;
     
     while (_UDPServer.GetPacket(packet) == ECode::OK) {
-        UDPData data;
+        PostData data;
 
         ret = ReadUDPPacket(packet, data);
         if (ret != ECode::OK) {
-            LOG_ERROR("Invalid UDP packet received. Can't be parsed");
+            LOG_ERROR("Invalid UDP packet received. Can't be parsed: ", ret);
             continue;
         }
+
+        ret = _forums.AddMessage(data.topic, data.msg, data.type, packet.source);
+        if (ret != ECode::OK) {
+            LOG_ERROR("Couldn't save the message: {}", ret);
+            continue;
+        }    
+        LOG_MESSAGE("{}:{} - {} - {} - {}", packet.source.ip, packet.source.port, data.topic, NetObj::TypeToString(data.type), data.msg);
     }
     return ECode::OK;
 }
@@ -155,6 +175,14 @@ ECode Server::ProcessTCPPackets()
         if (packet.bs.Read(rpc) != sizeof(uint8_t) || !NetObj::IsValidRPC(rpc)) {
             LOG_ERROR("Invalid TCP packet received from {}:{} ({}) - unknown RPC {}", packet.source.ip, packet.source.port, packet.source.client_id, rpc);
             LOG_ERROR("Packet discarded");
+            continue;
+        }
+
+        if (packet.source.client_id == "" && rpc != NetObj::RPC_CLIENT_ANNOUNCE) {
+            LOG_ERROR("Received RPC from unannounced client");
+            LOG_ERROR("Client kicked");
+
+            _TCPServer.Kick(client);
             continue;
         }
         
@@ -199,8 +227,15 @@ ECode Server::ProcessTCPPackets()
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
+                sf = !!sf;
 
-                // TODO: SUBSCRIBE
+                ret = _forums.Subscribe(packet.source.client_id, topic, sf);
+                if (ret != ECode::OK) {
+                    LOG_ERROR("Couldn't subscribe client {}:{} ({}) to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
+                    LOG_ERROR("Packet discarded");
+                    continue;
+                }
+
                 LOG_MESSAGE("Client {}:{} ({}) subscribed to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
                 break;
             }
@@ -215,7 +250,13 @@ ECode Server::ProcessTCPPackets()
                     continue;
                 }
 
-                // TODO: UNSUBSCRIBE
+                ret = _forums.Unsubscribe(packet.source.client_id, topic);
+                if (ret != ECode::OK) {
+                    LOG_ERROR("Couldn't unsubscribe client {}:{} ({}) from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
+                    LOG_ERROR("Packet discarded");
+                    continue;
+                }
+
                 LOG_MESSAGE("Client {}:{} ({}) unsubscribed from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
                 break;
             }
@@ -233,5 +274,32 @@ ECode Server::ProcessKeyboard()
             _running = false;
         }
     }
+    return ECode::OK;
+}
+
+ECode Server::ProcessForumsMessages()
+{
+    for (auto client : _TCPServer.GetClients()) {
+        const auto& client_id = client->GetPeer().client_id;
+        if (client_id == "") {
+            continue;
+        }
+
+        auto topics = _forums.GetUserMessages(client_id);
+        for (const auto& topic : topics) {
+            for (const auto& message : topic.second) {
+                BitStream bs;
+                bs.Write<uint8_t>(NetObj::RPC_MESSAGE);
+                bs.Write(topic.first);
+                bs.Write(message.type);
+                bs.Write(message.msg);
+                bs.Write(static_cast<std::string>(message.source.ip));
+                bs.Write(message.source.port);
+
+                client->Send(bs);
+            }
+        }
+    }
+
     return ECode::OK;
 }

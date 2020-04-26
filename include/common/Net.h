@@ -46,7 +46,7 @@ struct Peer
 
     std::string client_id;
     IP ip;
-    int port;
+    uint16_t port;
     int fd;
 
     bool IsValid() const {
@@ -56,7 +56,7 @@ struct Peer
         if (ip == INADDR_NONE)
             return false;
 
-        if (port < 1 || port > 65535)
+        if (port == 0)
             return false;
 
         return true;

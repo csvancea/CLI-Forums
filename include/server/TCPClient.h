@@ -25,6 +25,7 @@ public:
 
     const Peer& GetPeer() const;
     void SetClientID(const std::string& client_id);
+    ECode Send(const BitStream& bs);
 
 private:
     Peer _serverData;

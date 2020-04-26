@@ -120,3 +120,21 @@ void TCPClient::SetClientID(const std::string& client_id)
 {
     _clientData.client_id = client_id;
 }
+
+ECode TCPClient::Send(const BitStream& bs)
+{
+    BitStream netbs;
+    ssize_t ret;
+
+    netbs.Write((uint16_t)bs.GetBytes());
+    netbs.Write(bs.GetUnderlyingBuffer().data(), bs.GetBytes());
+
+    ret = send(_clientData.fd, netbs.GetUnderlyingBuffer().data(), netbs.GetBytes(), 0);
+    if ((size_t)ret != netbs.GetBytes()) {
+        return ECode::TCP_SEND;
+    }
+
+    LOG_MESSAGE("Sent {} bytes", ret);
+
+    return ECode::OK;
+}

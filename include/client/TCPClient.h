@@ -31,4 +31,5 @@ public:
 private:
     Peer _serverData;
     std::queue<Packet> _packets;
+    BitStream _fragments;
 };

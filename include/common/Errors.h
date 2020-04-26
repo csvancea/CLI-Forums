@@ -25,5 +25,7 @@ enum class ECode
     DUPLICATE,
     NONEXISTENT,
 
+    ALREADY_SUBSCRIBED,
+
     INVALID_PACKET
 };

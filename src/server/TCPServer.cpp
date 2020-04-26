@@ -126,6 +126,11 @@ void TCPServer::CloseSocket()
     }
 }
 
+const std::vector<TCPClient *>& TCPServer::GetClients() const
+{
+    return _clients;
+}
+
 TCPClient *TCPServer::GetClient(const std::string& client_id)
 {
     auto it = std::find_if(_clients.begin(), _clients.end(), 

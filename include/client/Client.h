@@ -19,6 +19,7 @@ public:
     ECode Run();
 
 private:
+    ECode ProcessTCPPackets();
     ECode ProcessKeyboard();
 
     bool _running;

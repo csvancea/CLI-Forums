@@ -45,9 +45,51 @@ ECode Client::Run()
 {
     while (_running) {
         _selector.Process();
+        ProcessTCPPackets();
         ProcessKeyboard();
     }
 
+    return ECode::OK;
+}
+
+ECode Client::ProcessTCPPackets()
+{
+    Packet packet;
+    
+    while (_TCPClient.GetPacket(packet) == ECode::OK) {
+        uint8_t rpc;
+
+        packet.bs.ResetReadPointer();
+        if (packet.bs.Read(rpc) != sizeof(uint8_t) || !NetObj::IsValidRPC(rpc)) {
+            LOG_ERROR("Invalid TCP packet received from {}:{} ({}) - unknown RPC {}", packet.source.ip, packet.source.port, packet.source.client_id, rpc);
+            LOG_ERROR("Packet discarded");
+            continue;
+        }
+        
+        switch (rpc) {
+            case NetObj::RPC_MESSAGE:
+            {
+                std::string topic;
+                uint8_t type;
+                std::string msg;
+                std::string ip;
+                uint16_t port;
+
+                packet.bs.Read(topic);
+                packet.bs.Read(type);
+                packet.bs.Read(msg);
+                packet.bs.Read(ip);
+                if (packet.bs.Read(port) != sizeof(uint16_t)) {
+                    LOG_ERROR("Incomplete RPC_MESSAGE");
+                    LOG_ERROR("Packet discarded");
+                    continue;
+                }
+
+                LOG_MESSAGE("{}:{} - {} - {} - {}", ip, port, topic, NetObj::TypeToString(type), msg);
+                break;
+            }
+        }
+    }
     return ECode::OK;
 }
 
