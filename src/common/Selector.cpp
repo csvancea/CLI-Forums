@@ -8,8 +8,8 @@ Selector::Selector() : _fdmax(-1)
 
 ECode Selector::Add(ISelectable *selectable)
 {
-    auto ret = _selectables.insert(std::make_pair(selectable->GetFileDescriptor(), selectable));
     auto fd = selectable->GetFileDescriptor();
+    auto ret = _selectables.insert(std::make_pair(fd, selectable));
     
     if (ret.second == false) {
         return ECode::DUPLICATE;

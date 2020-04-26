@@ -13,8 +13,9 @@ TCPServer::TCPServer(const Peer& server_data, Selector& selector) : _serverData(
 
 TCPServer::~TCPServer()
 {
-    for (auto client : _clients) {
-        delete client;
+    auto it = _clients.begin();
+    while (it != _clients.end()) {
+        it = RemoveClientImpl(it).first;
     }
 
     CloseSocket();
