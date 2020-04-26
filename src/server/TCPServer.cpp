@@ -61,23 +61,21 @@ int TCPServer::GetFileDescriptor() const
 void TCPServer::Select()
 {
     TCPClient *client = new TCPClient(_serverData);
-    ECode ret = client->Init();
+    ECode ret;
 
+    ret = client->Init();
     if (ret != ECode::OK) {
         LOG_MESSAGE("Can't accept TCP connection: {}", ret);
         delete client;
         return;
     }
 
-    ret = _selector.Add(client);
+    ret = AddClient(client);
     if (ret != ECode::OK) {
-        LOG_ERROR("Can't add new client to selector: {}", ret);
+        LOG_MESSAGE("Can't add new client to pool");
         delete client;
         return;
     }
-
-    _clients.push_back(client);
-    LOG_MESSAGE("TCP client added!");
 }
 
 ECode TCPServer::GetPacket(Packet& packet)
@@ -111,11 +109,7 @@ ECode TCPServer::Process()
         }
 
         if (remove) {
-            _selector.Remove(client);
-            it = _clients.erase(it);
-            delete client;
-
-            LOG_MESSAGE("TCP client removed!");
+            it = RemoveClientImpl(client).first;
         } else {
             it++;
         }
@@ -154,11 +148,47 @@ TCPClient *TCPServer::GetClient(int sockfd)
     return nullptr;
 }
 
+ECode TCPServer::AddClient(TCPClient *client)
+{
+    ECode ret = _selector.Add(client);
+    if (ret != ECode::OK) {
+        LOG_ERROR("Can't add new client to selector: {}", ret);
+        return ECode::SELECTOR_ADD;
+    }
+
+    _clients.push_back(client);
+    LOG_MESSAGE("TCP client added!");
+    return ECode::OK;
+}
+
+ECode TCPServer::RemoveClient(TCPClient *client)
+{
+    return RemoveClientImpl(client).second;
+}
+
+std::pair<std::vector<TCPClient *>::iterator, ECode> TCPServer::RemoveClientImpl(TCPClient *client)
+{
+    auto it = std::find(_clients.begin(), _clients.end(), client);
+    if (it == _clients.end()) {
+        LOG_WARNING("Couldn't find client in _clients vector.");
+    }
+
+    ECode err = _selector.Remove(client);
+    if (err != ECode::OK) {
+        LOG_ERROR("Can't remove client from selector. Client NOT deleted");
+        return std::make_pair(it, ECode::SELECTOR_REMOVE);
+    }
+
+    if (it != _clients.end()) {
+        it = _clients.erase(it);
+    }
+
+    delete client;
+    LOG_MESSAGE("TCP client deleted!");
+    return std::make_pair(it, ECode::OK);
+}
+
 ECode TCPServer::Kick(TCPClient *client)
 {
-    _selector.Remove(client);
-    _clients.erase(std::remove(_clients.begin(), _clients.end(), client), _clients.end());
-    delete client;
-
-    return ECode::OK;
+    return RemoveClient(client);
 }

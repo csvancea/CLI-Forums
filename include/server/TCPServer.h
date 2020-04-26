@@ -30,9 +30,14 @@ public:
     TCPClient *GetClient(const std::string& client_id);
     TCPClient *GetClient(int sockfd);
 
+    ECode AddClient(TCPClient *client);
+    ECode RemoveClient(TCPClient *client);
+
     ECode Kick(TCPClient *client);
 
 private:
+    std::pair<std::vector<TCPClient *>::iterator, ECode> RemoveClientImpl(TCPClient *client);
+
     Peer _serverData;
     Selector& _selector;
     std::queue<Packet> _packets;
