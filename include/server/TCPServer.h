@@ -3,6 +3,7 @@
 #include <queue>
 
 #include <server/TCPClient.h>
+#include <server/Forums.h>
 #include <common/ISelectable.h>
 #include <common/Selector.h>
 #include <common/Net.h>
@@ -11,7 +12,7 @@
 class TCPServer : public ISelectable
 {
 public:
-    TCPServer(const Peer& server_data, Selector& selector);
+    TCPServer(const Peer& server_data, Selector& selector, Forums& forums);
     ~TCPServer();
 
     TCPServer(const TCPServer&) = delete;
@@ -42,6 +43,7 @@ private:
 
     Peer _serverData;
     Selector& _selector;
+    Forums& _forums;
     std::queue<Packet> _packets;
 
     std::vector<TCPClient *>_clients;

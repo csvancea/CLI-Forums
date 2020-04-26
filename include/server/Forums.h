@@ -37,6 +37,8 @@ public:
      */
     std::list<std::pair<std::string, std::list<Message>>> GetUserMessages(const std::string& client_id);
 
+    void SetConnectionStatus(const std::string& client_id, bool status);
+
 private:
     struct UserSubscribe {
         std::unordered_set<std::string> topics;
@@ -80,4 +82,6 @@ private:
      * Value: Set ce contine clientii ce sunt abonati la topic cu sf asociat
      */
     std::unordered_map<std::string, std::unordered_set<TopicSubscription, TopicSubscriptionHash>> _topicSubscriptions;
+
+    std::unordered_set<std::string> _usersConnected;
 };

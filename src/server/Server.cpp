@@ -3,7 +3,7 @@
 #include <common/NetworkObjects.h>
 
 
-Server::Server(const Peer& server_data) :  _running(true), _serverData(server_data), _UDPServer(server_data), _TCPServer(server_data, _selector)
+Server::Server(const Peer& server_data) :  _running(true), _serverData(server_data), _UDPServer(server_data), _TCPServer(server_data, _selector, _forums)
 {
 
 }
@@ -213,6 +213,7 @@ ECode Server::ProcessTCPPackets()
                 }
 
                 client->SetClientID(client_id);
+                _forums.SetConnectionStatus(client_id, true);
                 LOG_MESSAGE("New client ({}) connected from {}:{}.", client_id, packet.source.ip, packet.source.port);
                 break;
             }

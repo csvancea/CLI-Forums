@@ -37,8 +37,8 @@ private:
     bool _running;
     Peer _serverData;
     Selector _selector;
+    Forums _forums;
     UDPServer _UDPServer;
     TCPServer _TCPServer;
     Keyboard _keyboard;
-    Forums _forums;
 };

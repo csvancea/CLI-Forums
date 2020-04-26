@@ -6,7 +6,7 @@
 
 #define MAX_TCP_CLIENTS_QUEUE 10
 
-TCPServer::TCPServer(const Peer& server_data, Selector& selector) : _serverData(server_data), _selector(selector)
+TCPServer::TCPServer(const Peer& server_data, Selector& selector, Forums& forums) : _serverData(server_data), _selector(selector), _forums(forums)
 {
 
 }
@@ -194,6 +194,7 @@ std::pair<std::vector<TCPClient *>::iterator, ECode> TCPServer::RemoveClientImpl
     }
 
     if ((*client_it)->GetPeer().client_id != "") {
+        _forums.SetConnectionStatus((*client_it)->GetPeer().client_id, false);
         LOG_MESSAGE("Client ({}) disconnected.", (*client_it)->GetPeer());
     }
     

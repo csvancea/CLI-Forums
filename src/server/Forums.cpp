@@ -29,7 +29,10 @@ ECode Forums::Unsubscribe(const std::string& client_id, const std::string& topic
 
 ECode Forums::AddMessage(const std::string& topic, const std::string& message, uint8_t type, const Peer& source)
 {
-    size_t subscribers = _topicSubscriptions[topic].size();
+    size_t subscribers = 0;
+    for (const auto& client :  _topicSubscriptions[topic]) {
+        subscribers += (client.sf || _usersConnected.count(client.client_id));
+    }
 
     if (subscribers) {
         Message msg;
@@ -74,4 +77,14 @@ std::list<std::pair<std::string, std::list<Forums::Message>>> Forums::GetUserMes
 
     _usersSubscribed[client_id].last_msg_id = _lastMessageId;
     return messages;
+}
+
+void Forums::SetConnectionStatus(const std::string& client_id, bool status)
+{
+    if (status) {
+        _usersConnected.insert(client_id);
+    }
+    else {
+        _usersConnected.erase(client_id);
+    }
 }
