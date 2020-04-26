@@ -28,7 +28,7 @@ ECode TCPClient::Init()
 
     _serverData.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (_serverData.fd < 0) {
-        LOG_ERROR("Can't create TCP socket.");
+        LOG_ERROR("Can't create TCP socket, errcode: {}", _serverData.fd);
         return ECode::TCP_SOCKET;
     }
 
@@ -36,7 +36,7 @@ ECode TCPClient::Init()
 
     ret = connect(_serverData.fd, (struct sockaddr *) &address, sizeof(struct sockaddr));
     if (ret < 0) {
-        LOG_ERROR("Can't connect TCP client to: {}:{}", _serverData.ip, _serverData.port);
+        LOG_ERROR("Can't connect TCP client to: {}:{}, errcode: {}", _serverData.ip, _serverData.port, ret);
         return ECode::TCP_CONNECT;
     }
     
@@ -85,7 +85,7 @@ void TCPClient::Select()
 
     bytes_read = recv(_serverData.fd, buffer, BUFFER_SIZE, 0);
     if (bytes_read < 0) {
-        LOG_ERROR("recv failed with error code: {}", bytes_read);
+        LOG_ERROR("recv failed, errcode: {}", bytes_read);
         return;
     }
 
@@ -143,7 +143,7 @@ ECode TCPClient::Send(const BitStream& bs)
     BitStream netbs;
     ssize_t ret;
 
-    netbs.Write((uint16_t)bs.GetBytes());
+    netbs.Write<uint16_t>(bs.GetBytes());
     netbs.Write(bs.GetUnderlyingBuffer().data(), bs.GetBytes());
 
     ret = send(_serverData.fd, netbs.GetUnderlyingBuffer().data(), netbs.GetBytes(), 0);

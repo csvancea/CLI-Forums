@@ -17,20 +17,20 @@ ECode Client::Init()
     LOG_DEBUG("Initializing client");
     err = _TCPClient.Init();
     if (err != ECode::OK) {
-        LOG_ERROR("Can't init TCPClient: {}", err);
+        LOG_ERROR("Can't init TCPClient, errcode: {}", err);
         return err;
     }
 
     err = _TCPClient.Announce();
     if (err != ECode::OK) {
-        LOG_ERROR("Can't send initial data to server: {}", err);
+        LOG_ERROR("Can't send initial data to server, errcode: {}", err);
         return err;
     }
 
     LOG_DEBUG("Initializing keyboard");
     err = _keyboard.Init();
     if (err != ECode::OK) {
-        LOG_ERROR("Can't init Keyboard: {}", err);
+        LOG_ERROR("Can't init Keyboard, errcode: {}", err);
         return err;
     }
 
@@ -38,6 +38,7 @@ ECode Client::Init()
     _selector.Add(&_TCPClient);
     _selector.Add(&_keyboard);
 
+    LOG_DEBUG("Client inited!");
     return ECode::OK;
 }
 
@@ -60,14 +61,14 @@ ECode Client::ProcessTCPPackets()
         uint8_t rpc;
 
         if (packet.size == 0) {
-            // server shutdown
+            LOG_DEBUG("Server shutdown.");
             _running = false;
             break;
         }
 
         packet.bs.ResetReadPointer();
         if (packet.bs.Read(rpc) != sizeof(uint8_t) || !NetObj::IsValidRPC(rpc)) {
-            LOG_ERROR("Invalid TCP packet received from {}:{} ({}) - unknown RPC {}", packet.source.ip, packet.source.port, packet.source.client_id, rpc);
+            LOG_ERROR("Invalid TCP packet received from {} - unknown RPC {}", packet.source, rpc);
             LOG_ERROR("Packet discarded");
             continue;
         }
@@ -86,12 +87,12 @@ ECode Client::ProcessTCPPackets()
                 packet.bs.Read(msg);
                 packet.bs.Read(ip);
                 if (packet.bs.Read(port) != sizeof(uint16_t)) {
-                    LOG_ERROR("Incomplete RPC_MESSAGE");
+                    LOG_ERROR("Incomplete RPC_MESSAGE received from {}", packet.source);
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
 
-                LOG_DEBUG("{}:{} - {} - {} - {}", ip, port, topic, NetObj::TypeToString(type), msg);
+                LOG_MESSAGE("{}:{} - {} - {} - {}", ip, port, topic, NetObj::TypeToString(type), msg);
                 break;
             }
         }
@@ -119,10 +120,11 @@ ECode Client::ProcessKeyboard()
                 if (ss >> topic >> sf) {
                     err = _TCPClient.Subscribe(topic, sf);
                     if (err == ECode::OK) {
-                        LOG_DEBUG("Gonna subscribe to topic={} with sf={}", topic, sf);
+                        LOG_DEBUG("Sent subscribe RPC: topic={} with sf={}", topic, sf);
+                        LOG_MESSAGE("topic subscribed");
                     }
                     else {
-                        LOG_ERROR("Couldn't subscribe: {}", err);
+                        LOG_ERROR("Couldn't send subscribe RPC, errcode: {}", err);
                     }
                 } 
                 else {
@@ -135,10 +137,11 @@ ECode Client::ProcessKeyboard()
                 if (ss >> topic) {
                     err = _TCPClient.Unsubscribe(topic);
                     if (err == ECode::OK) {
-                        LOG_DEBUG("Gonna unsubscribe from topic={}", topic);
+                        LOG_DEBUG("Sent unsubscribe RPC: topic={}", topic);
+                        LOG_MESSAGE("topic unsubscribed");
                     }
                     else {
-                        LOG_ERROR("Couldn't unsubscribe: {}", err);
+                        LOG_ERROR("Couldn't send unsubscribe RPC, errcode: {}", err);
                     }
                 }
                 else {

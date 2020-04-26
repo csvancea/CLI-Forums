@@ -23,7 +23,7 @@ ECode TCPClient::Init()
 
     _clientData.fd = accept(_serverData.fd, (struct sockaddr *) &client_addr, &sockaddr_size);
     if (_clientData.fd < 0) {
-        LOG_ERROR("Can't accept new TCP connection.");
+        LOG_ERROR("Can't accept new TCP connection, errcode: ", _clientData.fd);
         return ECode::TCP_ACCEPT;
     }
 
@@ -58,7 +58,7 @@ void TCPClient::Select()
 
     bytes_read = recv(_clientData.fd, buffer, BUFFER_SIZE, 0);
     if (bytes_read < 0) {
-        LOG_ERROR("recv failed with error code: {}", bytes_read);
+        LOG_ERROR("recv failed, errcode: {}", bytes_read);
         return;
     }
 
@@ -126,7 +126,7 @@ ECode TCPClient::Send(const BitStream& bs)
     BitStream netbs;
     ssize_t ret;
 
-    netbs.Write((uint16_t)bs.GetBytes());
+    netbs.Write<uint16_t>(bs.GetBytes());
     netbs.Write(bs.GetUnderlyingBuffer().data(), bs.GetBytes());
 
     ret = send(_clientData.fd, netbs.GetUnderlyingBuffer().data(), netbs.GetBytes(), 0);

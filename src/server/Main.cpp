@@ -34,13 +34,13 @@ int main(int argc, char *argv[])
     Server server(server_params);
     ret = server.Init();
     if (ret != ECode::OK) {
-        LOG_ERROR("Cant init the server, errcode: {}", ret);
+        LOG_ERROR("Can't init the server, errcode: {}", ret);
         return EXIT_FAILURE;
     }
 
     ret = server.Run();
     if (ret != ECode::OK) {
-        LOG_ERROR("An error occured while running the server: {}", ret);
+        LOG_ERROR("An error occured while running the server, errcode: {}", ret);
         return EXIT_FAILURE;
     }
 

@@ -61,6 +61,13 @@ struct Peer
 
         return true;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const Peer& peer) {
+        if (peer.client_id != "") {
+            return os << peer.client_id;
+        }
+        return os << peer.ip << ":" << peer.port;
+    }
 };
 
 struct Packet

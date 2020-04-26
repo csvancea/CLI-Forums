@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fmt/ostream.h>
+
 enum class ECode
 {
     OK,
@@ -29,3 +31,5 @@ enum class ECode
 
     INVALID_PACKET
 };
+
+std::ostream &operator<<(std::ostream& os, ECode ec);

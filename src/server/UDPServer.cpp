@@ -19,13 +19,13 @@ ECode UDPServer::Init()
 
     _serverData.fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (_serverData.fd < 0) {
-        LOG_ERROR("Can't create UDP socket.");
+        LOG_ERROR("Can't create UDP socket, errcode: {}", _serverData.fd);
         return ECode::UDP_SOCKET;
     }
 
     ret = bind(_serverData.fd, (struct sockaddr *) &address, sizeof(struct sockaddr));
     if (ret < 0) {
-        LOG_ERROR("Can't bind UDP socket to: {}:{}", _serverData.ip, _serverData.port);
+        LOG_ERROR("Can't bind UDP socket to: {}:{}, errcode: {}", _serverData.ip, _serverData.port, ret);
         return ECode::UDP_BIND;
     }
     
@@ -47,7 +47,7 @@ void UDPServer::Select()
 
     bytes_read = recvfrom(_serverData.fd, buffer, BUFFER_SIZE, 0, (sockaddr *) &client_addr, &sockaddr_size);
     if (bytes_read < 0) {
-        LOG_ERROR("recvfrom failed with error code: {}", bytes_read);
+        LOG_ERROR("recvfrom failed, errcode: {}", bytes_read);
         return;
     }
 

@@ -35,13 +35,13 @@ int main(int argc, char *argv[])
     Client client(server);
     ret = client.Init();
     if (ret != ECode::OK) {
-        LOG_ERROR("Cant init the client, errcode: {}", ret);
+        LOG_ERROR("Can't init the client, errcode: {}", ret);
         return EXIT_FAILURE;
     }
 
     ret = client.Run();
     if (ret != ECode::OK) {
-        LOG_ERROR("An error occured while running the client: {}", ret);
+        LOG_ERROR("An error occured while running the client, errcode: {}", ret);
         return EXIT_FAILURE;
     }
 

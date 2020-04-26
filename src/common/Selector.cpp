@@ -41,7 +41,7 @@ ECode Selector::Process()
 		
 	ret = select(_fdmax + 1, &fd_tmp, nullptr, nullptr, nullptr);
     if (ret < 0) {
-        LOG_ERROR("select failed with error code: {}", ret);
+        LOG_ERROR("select failed, errcode: {}", ret);
         return ECode::FD_SELECT;
     }
 

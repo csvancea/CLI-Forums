@@ -32,7 +32,7 @@ ECode TCPServer::Init()
 
     _serverData.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (_serverData.fd < 0) {
-        LOG_ERROR("Can't create TCP socket.");
+        LOG_ERROR("Can't create TCP socket, errcode: {}", _serverData.fd);
         return ECode::TCP_SOCKET;
     }
 
@@ -40,13 +40,13 @@ ECode TCPServer::Init()
 
     ret = bind(_serverData.fd, (struct sockaddr *) &address, sizeof(struct sockaddr));
     if (ret < 0) {
-        LOG_ERROR("Can't bind TCP socket to: {}:{}", _serverData.ip, _serverData.port);
+        LOG_ERROR("Can't bind TCP socket to: {}:{}, errcode: {}", _serverData.ip, _serverData.port, ret);
         return ECode::TCP_BIND;
     }
 
     ret = listen(_serverData.fd, MAX_TCP_CLIENTS_QUEUE);
     if (ret < 0) {
-        LOG_ERROR("Can't listen on TCP socket");
+        LOG_ERROR("Can't listen on TCP socket, errcode: {}", ret);
         return ECode::TCP_LISTEN;
     }
     
@@ -66,14 +66,14 @@ void TCPServer::Select()
 
     ret = client->Init();
     if (ret != ECode::OK) {
-        LOG_DEBUG("Can't accept TCP connection: {}", ret);
+        LOG_DEBUG("Can't accept TCP connection, errcode: {}", ret);
         delete client;
         return;
     }
 
     ret = AddClient(client);
     if (ret != ECode::OK) {
-        LOG_DEBUG("Can't add new client to pool");
+        LOG_DEBUG("Can't add new client to pool, errcode: {}", ret);
         delete client;
         return;
     }
@@ -158,7 +158,7 @@ ECode TCPServer::AddClient(TCPClient *client)
 {
     ECode ret = _selector.Add(client);
     if (ret != ECode::OK) {
-        LOG_ERROR("Can't add new client to selector: {}", ret);
+        LOG_ERROR("Can't add new client to selector, errcode: {}", ret);
         return ECode::SELECTOR_ADD;
     }
 
@@ -193,6 +193,10 @@ std::pair<std::vector<TCPClient *>::iterator, ECode> TCPServer::RemoveClientImpl
         return std::make_pair(std::next(client_it), ECode::SELECTOR_REMOVE);
     }
 
+    if ((*client_it)->GetPeer().client_id != "") {
+        LOG_MESSAGE("Client ({}) disconnected.", (*client_it)->GetPeer());
+    }
+    
     delete *client_it;
     client_it = _clients.erase(client_it);
     LOG_DEBUG("TCP client deleted!");

@@ -25,7 +25,7 @@ void Keyboard::Select()
     buffer.resize(BUFFER_SIZE);
     bytes_read = read(STDIN_FILENO, &buffer[0], BUFFER_SIZE);
     if (bytes_read < 0) {
-        LOG_ERROR("read failed with error code: {}", bytes_read);
+        LOG_ERROR("read failed, errcode: {}", bytes_read);
         return;
     }
     buffer.resize(bytes_read);

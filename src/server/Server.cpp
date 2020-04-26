@@ -15,13 +15,13 @@ ECode Server::Init()
     LOG_DEBUG("Initializing servers");
     err = _UDPServer.Init();
     if (err != ECode::OK) {
-        LOG_ERROR("Can't init UDPServer: {}", err);
+        LOG_ERROR("Can't init UDPServer, errcode: {}", err);
         return err;
     }
 
     err = _TCPServer.Init();
     if (err != ECode::OK) {
-        LOG_ERROR("Can't init TCPServer: {}", err);
+        LOG_ERROR("Can't init TCPServer, errcode: {}", err);
         return err;
     }
 
@@ -29,7 +29,7 @@ ECode Server::Init()
     LOG_DEBUG("Initializing keyboard");
     err = _keyboard.Init();
     if (err != ECode::OK) {
-        LOG_ERROR("Can't init Keyboard: {}", err);
+        LOG_ERROR("Can't init Keyboard, errcode: {}", err);
         return err;
     }
 
@@ -38,6 +38,7 @@ ECode Server::Init()
     _selector.Add(&_TCPServer);
     _selector.Add(&_keyboard);
 
+    LOG_DEBUG("Server inited!");
     return ECode::OK;
 }
 
@@ -141,13 +142,13 @@ ECode Server::ProcessUDPPackets()
 
         ret = ReadUDPPacket(packet, data);
         if (ret != ECode::OK) {
-            LOG_ERROR("Invalid UDP packet received. Can't be parsed: ", ret);
+            LOG_ERROR("Invalid UDP packet received. Can't be parsed, errcode: {}", ret);
             continue;
         }
 
         ret = _forums.AddMessage(data.topic, data.msg, data.type, packet.source);
         if (ret != ECode::OK) {
-            LOG_ERROR("Couldn't save the message: {}", ret);
+            LOG_ERROR("Couldn't save the message, errcode: {}", ret);
             continue;
         }    
         LOG_DEBUG("{}:{} - {} - {} - {}", packet.source.ip, packet.source.port, data.topic, NetObj::TypeToString(data.type), data.msg);
@@ -166,20 +167,20 @@ ECode Server::ProcessTCPPackets()
 
         TCPClient *client = _TCPServer.GetClient(packet.source.fd);
         if (client == nullptr) {
-            LOG_ERROR("TCP packet arrived from unknown source {}:{} ({})", packet.source.ip, packet.source.port, packet.source.client_id);
+            LOG_ERROR("TCP packet arrived from unknown source: {}", packet.source);
             LOG_ERROR("Packet discarded");
             continue;
         }
 
         packet.bs.ResetReadPointer();
         if (packet.bs.Read(rpc) != sizeof(uint8_t) || !NetObj::IsValidRPC(rpc)) {
-            LOG_ERROR("Invalid TCP packet received from {}:{} ({}) - unknown RPC {}", packet.source.ip, packet.source.port, packet.source.client_id, rpc);
+            LOG_ERROR("Invalid TCP packet received from {} - unknown RPC {}", packet.source, rpc);
             LOG_ERROR("Packet discarded");
             continue;
         }
 
         if (packet.source.client_id == "" && rpc != NetObj::RPC_CLIENT_ANNOUNCE) {
-            LOG_ERROR("Received RPC from unannounced client");
+            LOG_ERROR("Received RPC from unannounced client {}", packet.source);
             LOG_ERROR("Client kicked");
 
             _TCPServer.Kick(client);
@@ -192,7 +193,7 @@ ECode Server::ProcessTCPPackets()
                 std::string client_id;
 
                 if (packet.bs.Read(client_id) == 0 || client_id.length() == 0) {
-                    LOG_ERROR("Empty client_id received from {}:{}", packet.source.ip, packet.source.port);
+                    LOG_ERROR("Empty client_id received from {}", packet.source);
                     LOG_ERROR("Client kicked");
 
                     _TCPServer.Kick(client);
@@ -206,13 +207,13 @@ ECode Server::ProcessTCPPackets()
                     continue;
                 }
                 if (client->GetPeer().client_id != "") {
-                    LOG_ERROR("Client {}:{} ({}) already announced itself", packet.source.ip, packet.source.port, packet.source.client_id);
+                    LOG_ERROR("Client {} already announced itself", packet.source);
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
 
                 client->SetClientID(client_id);
-                LOG_DEBUG("Client {}:{} ({}) connected and announced itself", packet.source.ip, packet.source.port, client_id);
+                LOG_MESSAGE("New client ({}) connected from {}:{}.", client_id, packet.source.ip, packet.source.port);
                 break;
             }
 
@@ -223,7 +224,7 @@ ECode Server::ProcessTCPPackets()
 
                 packet.bs.Read(topic);
                 if (packet.bs.Read(sf) != sizeof(uint8_t)) {
-                    LOG_ERROR("Invalid RPC_SUBSCRIBE");
+                    LOG_ERROR("Incomplete RPC_SUBSCRIBE received from {}", packet.source);
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
@@ -231,12 +232,12 @@ ECode Server::ProcessTCPPackets()
 
                 ret = _forums.Subscribe(packet.source.client_id, topic, sf);
                 if (ret != ECode::OK) {
-                    LOG_ERROR("Couldn't subscribe client {}:{} ({}) to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
+                    LOG_ERROR("Couldn't subscribe client {} to topic={} sf={}, errcode: {}", packet.source, topic, sf, ret);
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
 
-                LOG_DEBUG("Client {}:{} ({}) subscribed to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
+                LOG_DEBUG("Client {} subscribed to topic={} sf={}", packet.source, topic, sf);
                 break;
             }
 
@@ -245,19 +246,19 @@ ECode Server::ProcessTCPPackets()
                 std::string topic;
 
                 if (packet.bs.Read(topic) == 0 || topic.length() == 0) {
-                    LOG_ERROR("Invalid RPC_UNSUBSCRIBE");
+                    LOG_ERROR("Incomplete RPC_UNSUBSCRIBE received from {}", packet.source);
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
 
                 ret = _forums.Unsubscribe(packet.source.client_id, topic);
                 if (ret != ECode::OK) {
-                    LOG_ERROR("Couldn't unsubscribe client {}:{} ({}) from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
+                    LOG_ERROR("Couldn't unsubscribe client {} from topic={}, errcode: {}", packet.source, topic, ret);
                     LOG_ERROR("Packet discarded");
                     continue;
                 }
 
-                LOG_DEBUG("Client {}:{} ({}) unsubscribed from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
+                LOG_DEBUG("Client {} unsubscribed from topic={}", packet.source, topic);
                 break;
             }
         }
