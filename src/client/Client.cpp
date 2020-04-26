@@ -59,6 +59,12 @@ ECode Client::ProcessTCPPackets()
     while (_TCPClient.GetPacket(packet) == ECode::OK) {
         uint8_t rpc;
 
+        if (packet.size == 0) {
+            // server shutdown
+            _running = false;
+            break;
+        }
+
         packet.bs.ResetReadPointer();
         if (packet.bs.Read(rpc) != sizeof(uint8_t) || !NetObj::IsValidRPC(rpc)) {
             LOG_ERROR("Invalid TCP packet received from {}:{} ({}) - unknown RPC {}", packet.source.ip, packet.source.port, packet.source.client_id, rpc);
