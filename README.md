@@ -1,10 +1,19 @@
-#  Tema 2 - client-server
+#  Tema 2 - Client <--> Server
 ## Student: Cosmin-Razvan VANCEA - 323CA
 ----------------------------------------
 
 
-### Descrierea protocolului:
+### Build & Run:
+* `make build_server` - compileaza serverul
+* `make build_client` - compileaza clientul
+* `make run_server` - porneste serverul
+* `CLIENT_ID=sal make run_client` porneste un client cu client_id=sal
 
+Pentru un output verbose cu mesaje de debugging care arata starile prin care trec
+programele, decomenteaza linia din `Makefile`, apoi `make clean && make build`
+
+
+### Descrierea protocolului:
 #### Client UDP -> Server UDP
 * `UDPServer` porneste un socket UDP si asculta pe el.
 * Cand ajunge un packet, il plasez intr-un `BitStream` (explicatie mai jos)
@@ -96,7 +105,6 @@ Aceste module sunt folosite atat de server, cat si de client(subscriber):
   impreuna cu codul care face serializarea. (ex: `STRING`, `SHORTREAL` etc)
 
 #### Server:
-
 1. UDPServer
   * Deschide un socket UDP si asteapta date pe el de la clienti.
   * Plaseaza mesajele intr-o coada si urmeaza a fi procesate de server.
@@ -122,7 +130,6 @@ Aceste module sunt folosite atat de server, cat si de client(subscriber):
   * Administreaza clientii TCP, serverele TCP/UDP si mesajele.
 
 #### Client:
-
 1. TCPClient
   * Stabileste conexiunea cu serverul TCP si trimite/primeste mesaje.
 

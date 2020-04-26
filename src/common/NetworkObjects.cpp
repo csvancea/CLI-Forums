@@ -204,7 +204,7 @@ size_t BitStream::Read(std::string& out)
         return read_bytes;
     }
 
-    out.resize(size); // size poate fi exploatat
+    out.resize(size);
 
     ret = Read(&out[0], size);
     read_bytes += ret;

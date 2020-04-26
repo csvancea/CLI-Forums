@@ -48,7 +48,7 @@ ECode TCPClient::Announce()
 {
     BitStream bs;
     bs.Write<uint8_t>(NetObj::RPC_CLIENT_ANNOUNCE);
-    bs.Write(_serverData.client_id); // nu are ce cauta in _serverData
+    bs.Write(_serverData.client_id);
 
     return Send(bs);
 }
