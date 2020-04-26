@@ -65,7 +65,7 @@ static size_t Impl_Read(BitStream& bs, std::string& str, size_t max_size)
 	bytes_read = bs.Read(&str[0], max_size);
 
 	size_t i = 0;
-	for (; i < max_size; ++i) {
+	for (; i < bytes_read; ++i) {
 		if (str[i] == '\0') {
 			break;
 		}

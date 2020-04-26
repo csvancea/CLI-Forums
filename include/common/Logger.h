@@ -9,11 +9,6 @@
 #include <fstream>
 #include <fmt/format.h>
 
-#ifdef _DEBUG
-	#define ENABLE_LOGGING
-#endif
-
-#ifdef ENABLE_LOGGING
 
 #define LOG_DEBUG(format, ...) \
             do { Logger::GetInstance().Log(Logger::RULE_DEBUG, format, ## __VA_ARGS__); } while (0)
@@ -23,14 +18,6 @@
 
 #define LOG_ERROR(format, ...) \
             do { Logger::GetInstance().Log(Logger::RULE_ERROR, format, ## __VA_ARGS__); } while (0)
-
-#else
-
-#define LOG_DEBUG(format, ...)
-#define LOG_WARNING(format, ...)
-#define LOG_ERROR(format, ...)
-
-#endif
 
 #define LOG_MESSAGE(format, ...) \
             do { Logger::GetInstance().Log(Logger::RULE_MESSAGE, format, ## __VA_ARGS__); } while (0)

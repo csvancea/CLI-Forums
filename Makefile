@@ -1,4 +1,5 @@
-CXXFLAGS = -c -g -Wall -Wextra -std=c++17 -DFMT_HEADER_ONLY -DENABLE_LOGGING -I./include
+CXXFLAGS = -c -Wall -Wextra -std=c++17 -DFMT_HEADER_ONLY -I./include
+# CXXFLAGS += -g -DENABLE_LOGGING
 LDFLAGS =
 
 IP ?= 127.0.0.1
