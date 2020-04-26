@@ -10,7 +10,7 @@
 * `CLIENT_ID=sal make run_client` porneste un client cu client_id=sal
 
 Pentru un output verbose cu mesaje de debugging care arata starile prin care trec
-programele, decomenteaza linia din `Makefile`, apoi `make clean && make build`
+programele, decomenteaza prima linie din `Makefile`, apoi `make clean && make build`
 
 
 ### Descrierea protocolului:
@@ -136,3 +136,8 @@ Aceste module sunt folosite atat de server, cat si de client(subscriber):
 2. Client
   * Logica clientului.
   * Interpreteaza mesajele primite si da comenzi serverului (subscribe etc)
+
+
+PS: Printre cele mai faine teme de pana acum la ACS :)
+I-am acordat cam putin timp din pacate, as fi vrut sa mai lucrez la reducerea de
+cod duplicat intre client si server (mai ales in cele 2 fisiere TCPClient.cpp)

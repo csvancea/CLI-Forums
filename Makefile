@@ -1,5 +1,6 @@
 CXXFLAGS = -c -Wall -Wextra -std=c++17 -DFMT_HEADER_ONLY -I./include
 # CXXFLAGS += -g -DENABLE_LOGGING
+# CXXFLAGS += -O2 -march=native -mtune=native
 LDFLAGS =
 
 IP ?= 127.0.0.1
