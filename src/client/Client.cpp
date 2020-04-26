@@ -79,7 +79,7 @@ ECode Client::ProcessTCPPackets()
                 std::string topic;
                 uint8_t type;
                 std::string msg;
-                std::string ip;
+                uint32_t ip;
                 uint16_t port;
 
                 packet.bs.Read(topic);
@@ -92,7 +92,7 @@ ECode Client::ProcessTCPPackets()
                     continue;
                 }
 
-                LOG_MESSAGE("{}:{} - {} - {} - {}", ip, port, topic, NetObj::TypeToString(type), msg);
+                LOG_MESSAGE("{}:{} - {} - {} - {}", IP(ip), port, topic, NetObj::TypeToString(type), msg);
                 break;
             }
         }

@@ -295,7 +295,7 @@ ECode Server::ProcessForumsMessages()
                 bs.Write(topic.first);
                 bs.Write(message.type);
                 bs.Write(message.msg);
-                bs.Write(static_cast<std::string>(message.source.ip));
+                bs.Write(static_cast<uint32_t>(message.source.ip));
                 bs.Write(message.source.port);
 
                 client->Send(bs);
