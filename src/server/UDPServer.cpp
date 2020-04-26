@@ -19,7 +19,7 @@ ECode UDPServer::Init()
 
     _serverData.fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (_serverData.fd < 0) {
-        LOG_ERROR("Can't create UDP socket, errcode: {}", _serverData.fd);
+        LOG_ERROR("Can't create socket, errcode: {}", _serverData.fd);
         return ECode::UDP_SOCKET;
     }
 

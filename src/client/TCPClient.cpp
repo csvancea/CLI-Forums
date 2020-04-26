@@ -28,7 +28,7 @@ ECode TCPClient::Init()
 
     _serverData.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (_serverData.fd < 0) {
-        LOG_ERROR("Can't create TCP socket, errcode: {}", _serverData.fd);
+        LOG_ERROR("Can't create socket, errcode: {}", _serverData.fd);
         return ECode::TCP_SOCKET;
     }
 
@@ -36,7 +36,7 @@ ECode TCPClient::Init()
 
     ret = connect(_serverData.fd, (struct sockaddr *) &address, sizeof(struct sockaddr));
     if (ret < 0) {
-        LOG_ERROR("Can't connect TCP client to: {}:{}, errcode: {}", _serverData.ip, _serverData.port, ret);
+        LOG_ERROR("TCP client can't connect to: {}:{}, errcode: {}", _serverData.ip, _serverData.port, ret);
         return ECode::TCP_CONNECT;
     }
     

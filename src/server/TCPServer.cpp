@@ -32,7 +32,7 @@ ECode TCPServer::Init()
 
     _serverData.fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (_serverData.fd < 0) {
-        LOG_ERROR("Can't create TCP socket, errcode: {}", _serverData.fd);
+        LOG_ERROR("Can't create socket, errcode: {}", _serverData.fd);
         return ECode::TCP_SOCKET;
     }
 

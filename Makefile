@@ -7,7 +7,7 @@ PORT ?= 7331
 CLIENT_ID ?= hello
 
 EXE_SERVER = server
-EXE_CLIENT = client
+EXE_CLIENT = subscriber
 
 SRC_DIR = src
 OUT_DIR = build
