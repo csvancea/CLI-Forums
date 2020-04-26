@@ -159,32 +159,66 @@ ECode Server::ProcessTCPPackets()
         }
         
         switch (rpc) {
-        case NetObj::RPC_CLIENT_ANNOUNCE:
-            std::string client_id;
+            case NetObj::RPC_CLIENT_ANNOUNCE:
+            {
+                std::string client_id;
 
-            if (packet.bs.Read(client_id) == 0 || client_id.length() == 0) {
-                LOG_ERROR("Empty client_id received from {}:{}", packet.source.ip, packet.source.port);
-                LOG_ERROR("Client kicked");
+                if (packet.bs.Read(client_id) == 0 || client_id.length() == 0) {
+                    LOG_ERROR("Empty client_id received from {}:{}", packet.source.ip, packet.source.port);
+                    LOG_ERROR("Client kicked");
 
-                _TCPServer.Kick(client);
-                continue;
+                    _TCPServer.Kick(client);
+                    continue;
+                }
+                if (_TCPServer.GetClient(client_id) != nullptr) {
+                    LOG_ERROR("There's already a connected client with client_id={}", client_id);
+                    LOG_ERROR("Client kicked");
+
+                    _TCPServer.Kick(client);
+                    continue;
+                }
+                if (client->GetPeer().client_id != "") {
+                    LOG_ERROR("Client {}:{} ({}) already announced itself", packet.source.ip, packet.source.port, packet.source.client_id);
+                    LOG_ERROR("Packet discarded");
+                    continue;
+                }
+
+                client->SetClientID(client_id);
+                LOG_MESSAGE("Client {}:{} ({}) connected and announced itself", packet.source.ip, packet.source.port, client_id);
+                break;
             }
-            if (_TCPServer.GetClient(client_id) != nullptr) {
-                LOG_ERROR("There's already a connected client with client_id={}", client_id);
-                LOG_ERROR("Client kicked");
 
-                _TCPServer.Kick(client);
-                continue;
-            }
-            if (client->GetPeer().client_id != "") {
-                LOG_ERROR("Client {}:{} ({}) already announced itself", packet.source.ip, packet.source.port, packet.source.client_id);
-                LOG_ERROR("Packet discarded");
-                continue;
+            case NetObj::RPC_SUBSCRIBE:
+            {
+                std::string topic;
+                uint8_t sf;
+
+                packet.bs.Read(topic);
+                if (packet.bs.Read(sf) != sizeof(uint8_t)) {
+                    LOG_ERROR("Invalid RPC_SUBSCRIBE");
+                    LOG_ERROR("Packet discarded");
+                    continue;
+                }
+
+                // TODO: SUBSCRIBE
+                LOG_MESSAGE("Client {}:{} ({}) subscribed to topic={} sf={}", packet.source.ip, packet.source.port, packet.source.client_id, topic, sf);
+                break;
             }
 
-            client->SetClientID(client_id);
-            LOG_MESSAGE("Client {}:{} ({}) connected and announced itself", packet.source.ip, packet.source.port, client_id);
-            break;
+            case NetObj::RPC_UNSUBSCRIBE:
+            {
+                std::string topic;
+
+                if (packet.bs.Read(topic) == 0 || topic.length() == 0) {
+                    LOG_ERROR("Invalid RPC_UNSUBSCRIBE");
+                    LOG_ERROR("Packet discarded");
+                    continue;
+                }
+
+                // TODO: UNSUBSCRIBE
+                LOG_MESSAGE("Client {}:{} ({}) unsubscribed from topic={}", packet.source.ip, packet.source.port, packet.source.client_id, topic);
+                break;
+            }
         }
     }
     return ECode::OK;

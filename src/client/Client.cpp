@@ -53,6 +53,7 @@ ECode Client::Run()
 
 ECode Client::ProcessKeyboard()
 {
+    ECode err;
     std::string cmdline;
 
     while (_keyboard.GetCommand(cmdline) == ECode::OK) {
@@ -68,10 +69,13 @@ ECode Client::ProcessKeyboard()
                 int sf;
 
                 if (ss >> topic >> sf) {
-                    BitStream bs;
-                    // bs.Write
-
-                    LOG_MESSAGE("Gonna subscribe to topic={} with sf={}", topic, sf);
+                    err = _TCPClient.Subscribe(topic, sf);
+                    if (err == ECode::OK) {
+                        LOG_MESSAGE("Gonna subscribe to topic={} with sf={}", topic, sf);
+                    }
+                    else {
+                        LOG_ERROR("Couldn't subscribe: {}", err);
+                    }
                 } 
                 else {
                     LOG_ERROR("subscribe <topic> <sf>");
@@ -81,10 +85,16 @@ ECode Client::ProcessKeyboard()
                 std::string topic;
 
                 if (ss >> topic) {
-                    LOG_MESSAGE("Gonna unsubscribe from topic={}", topic);
+                    err = _TCPClient.Unsubscribe(topic);
+                    if (err == ECode::OK) {
+                        LOG_MESSAGE("Gonna unsubscribe from topic={}", topic);
+                    }
+                    else {
+                        LOG_ERROR("Couldn't unsubscribe: {}", err);
+                    }
                 }
                 else {
-                    LOG_ERROR("subscribe <topic> <sf>");
+                    LOG_ERROR("unsubscribe <topic>");
                 }          
             }
             else {

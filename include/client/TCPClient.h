@@ -23,7 +23,10 @@ public:
     ECode GetPacket(Packet& packet);
     void CloseSocket();
     ECode Send(const BitStream& bs);
+
     ECode Announce();
+    ECode Subscribe(const std::string& topic, uint8_t sf);
+    ECode Unsubscribe(const std::string& topic);
 
 private:
     Peer _serverData;

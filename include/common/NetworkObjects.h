@@ -19,6 +19,8 @@ namespace NetObj
         RPC_START = RPC_INVALID,
         
         RPC_CLIENT_ANNOUNCE,
+        RPC_SUBSCRIBE,
+        RPC_UNSUBSCRIBE,
 
         RPC_END
     };

@@ -53,6 +53,25 @@ ECode TCPClient::Announce()
     return Send(bs);
 }
 
+ECode TCPClient::Subscribe(const std::string& topic, uint8_t sf)
+{
+    BitStream bs;
+    bs.Write<uint8_t>(NetObj::RPC_SUBSCRIBE);
+    bs.Write(topic);
+    bs.Write(sf);
+
+    return Send(bs);
+}
+
+ECode TCPClient::Unsubscribe(const std::string& topic)
+{
+    BitStream bs;
+    bs.Write<uint8_t>(NetObj::RPC_UNSUBSCRIBE);
+    bs.Write(topic);
+
+    return Send(bs);
+}
+
 int TCPClient::GetFileDescriptor() const
 {
     return _serverData.fd;
