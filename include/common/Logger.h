@@ -9,9 +9,12 @@
 #include <fstream>
 #include <fmt/format.h>
 
-
-#define LOG_DEBUG(format, ...) \
+#ifdef ENABLE_LOGGING
+	#define LOG_DEBUG(format, ...) \
             do { Logger::GetInstance().Log(Logger::RULE_DEBUG, format, ## __VA_ARGS__); } while (0)
+#else
+	#define LOG_DEBUG(format, ...)
+#endif
 
 #define LOG_WARNING(format, ...) \
             do { Logger::GetInstance().Log(Logger::RULE_WARNING, format, ## __VA_ARGS__); } while (0)
